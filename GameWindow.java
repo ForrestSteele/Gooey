@@ -17,7 +17,7 @@ import javax.swing.SwingUtilities;
 /**
  * Provides methods to construct and manipulate the main game window. 
  *
- * @author Forrest Steele
+ * @author Forrest Steele, 
  * @version March 2025
  */
 public class GameWindow implements ActionListener, Runnable
