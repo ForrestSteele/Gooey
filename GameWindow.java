@@ -13,6 +13,11 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import java.util.ArrayList;
+import java.awt.Color;
+import javax.swing.Box;
+import javax.swing.BorderFactory;
+import javax.swing.border.Border;
 
 /**
  * Provides methods to construct and manipulate the main game window. 
@@ -27,7 +32,6 @@ public class GameWindow implements ActionListener, Runnable
     
     JFrame frame;
     JPanel mainPanel;
-    JTextField letterField;
     
     public GameWindow() {
         int frameWidth = 700;
@@ -40,50 +44,83 @@ public class GameWindow implements ActionListener, Runnable
         mainPanel = new JPanel();
         mainPanel.setLayout(null);
         frame.setContentPane(mainPanel);
+        mainPanel.setBackground(Color.WHITE);
+        
+        Color custom = new Color(232, 232, 232);
 
         // Setup text fields and labels
-        Font font = new Font(Font.MONOSPACED, Font.PLAIN, 14);
         
-        int margin = 100;
-        int boxSize = (frameWidth - margin * 2)/5;
+        ArrayList<JTextField> letterFields = new ArrayList<JTextField>();
+        Border border = BorderFactory.createLineBorder(custom, 2);
+        Font guessFont = new Font(Font.SANS_SERIF, Font.PLAIN, 20);
+        
+        int boxSize = 70;
+        
+        int marginBetween = 8;
+        int marginVertical = 20;
+        int marginHorizontal = (frameWidth - (5 * (boxSize + marginBetween)))/2;
         // Set up all text boxes
-        for (int column = 0; column < 5; column++) {
-            for (int row = 0; row < 6; row++) {
-                letterField = new JTextField();
-                letterField.setLocation(margin + column*boxSize, margin + row*boxSize);
+        for (int row = 0; row < 6; row++) {
+            for (int column = 0; column < 5; column++) {
+                letterFields.add(new JTextField());
+                JTextField letterField = letterFields.get((row * 5) + column);
+                letterField.setLocation(marginHorizontal + column*(boxSize + marginBetween), marginVertical + row*(boxSize + marginBetween));
                 letterField.setSize(boxSize, boxSize);
+                letterField.setBorder(border);
+                letterField.setHorizontalAlignment(JTextField.CENTER);
+                letterField.setFont(guessFont);
+                letterField.setEditable(false);
+                letterField.setText("A");
+                letterField.setBackground(Color.WHITE);
                 mainPanel.add(letterField);
             }
         }
         
+        ArrayList<JButton> keyboardButtons = new ArrayList<JButton>();
+        String keyboardKeys = "QWERTYUIOPASDFGHJKL@ZXCVBNM&";
+        Border keyboardBorder = BorderFactory.createLineBorder(custom, 0);
+        Font keyboardFont = new Font(Font.SANS_SERIF, Font.BOLD, 20);
+        
         //firstRowOfLetters
         for (int letter = 0; letter < 10; letter++) {
             int letterBoxSize = 50;
-            int letterMargin = (frameWidth - letterBoxSize * 10)/2;
-            letterField = new JTextField();
-            letterField.setLocation(margin + letter*letterBoxSize, margin + boxSize * 6 + 20);
-            letterField.setSize(letterBoxSize, letterBoxSize);
-            mainPanel.add(letterField);
+            int letterMargin = (frameWidth - (letterBoxSize + marginBetween) * 10)/2;
+            keyboardButtons.add(new JButton(keyboardKeys.substring(letter, letter + 1)));
+            JButton keyboardButton = keyboardButtons.get(letter);
+            keyboardButton.setLocation(letterMargin + letter * (letterBoxSize + marginBetween), marginVertical + (boxSize + marginBetween) * 6 + 20);
+            keyboardButton.setSize(letterBoxSize, letterBoxSize);
+            keyboardButton.setBackground(custom);
+            keyboardButton.setBorder(keyboardBorder);
+            keyboardButton.setFont(keyboardFont);
+            mainPanel.add(keyboardButton);
         }
         
         //secondRowOfLetters
         for (int letter = 0; letter < 9; letter++) {
             int letterBoxSize = 50;
-            int letterMargin = (frameWidth - letterBoxSize * 9)/2;
-            letterField = new JTextField();
-            letterField.setLocation(margin + letter*letterBoxSize, margin + boxSize * 6 + 20 + letterBoxSize);
-            letterField.setSize(letterBoxSize, letterBoxSize);
-            mainPanel.add(letterField);
+            int letterMargin = (frameWidth - (letterBoxSize + marginBetween) * 9)/2;
+            keyboardButtons.add(new JButton(keyboardKeys.substring(10 + letter, 10 + letter + 1)));
+            JButton keyboardButton = keyboardButtons.get(10 + letter);
+            keyboardButton.setLocation(letterMargin + letter * (letterBoxSize + marginBetween), marginVertical + (boxSize + marginBetween) * 6 + 20 + (letterBoxSize + marginBetween));
+            keyboardButton.setSize(letterBoxSize, letterBoxSize);
+            keyboardButton.setBackground(custom);
+            keyboardButton.setBorder(keyboardBorder);
+            keyboardButton.setFont(keyboardFont);
+            mainPanel.add(keyboardButton);
         }
         
         //thirdRowOfLetters
-        for (int letter = 0; letter < 8; letter++) {
+        for (int letter = 0; letter < 9; letter++) {
             int letterBoxSize = 50;
-            int letterMargin = (frameWidth - letterBoxSize * 8)/2;
-            letterField = new JTextField();
-            letterField.setLocation(margin + letter*letterBoxSize, margin + boxSize * 6 + 20 + letterBoxSize * 2);
-            letterField.setSize(letterBoxSize, letterBoxSize);
-            mainPanel.add(letterField);
+            int letterMargin = (frameWidth - (letterBoxSize + marginBetween) * 9)/2;
+            keyboardButtons.add(new JButton(keyboardKeys.substring(19 + letter, 19 + letter + 1)));
+            JButton keyboardButton = keyboardButtons.get(19 + letter);
+            keyboardButton.setLocation(letterMargin + letter * (letterBoxSize + marginBetween), marginVertical + (boxSize + marginBetween) * 6 + 20 + (letterBoxSize + marginBetween) * 2);
+            keyboardButton.setSize(letterBoxSize, letterBoxSize);
+            keyboardButton.setBackground(custom);
+            keyboardButton.setBorder(keyboardBorder);
+            keyboardButton.setFont(keyboardFont);
+            mainPanel.add(keyboardButton);
         }
         
         frame.setVisible(true);
