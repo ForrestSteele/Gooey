@@ -18,6 +18,8 @@ import java.awt.Color;
 import javax.swing.Box;
 import javax.swing.BorderFactory;
 import javax.swing.border.Border;
+import java.awt.event.KeyListener;
+import java.awt.event.KeyEvent;
 
 /**
  * Provides methods to construct and manipulate the main game window. 
@@ -29,15 +31,32 @@ public class GameWindow implements ActionListener, Runnable
 {
     private String targetWord;
     private String guessWord;
+    private ArrayList<JLabel> letterLabels;
+    private ArrayList<JButton> keyboardButtons;
     
+    private ArrayList<Integer> keys;
+
     JFrame frame;
     JPanel mainPanel;
     
+    private int currentRow;
+    private int currentColumn;
+    
     public GameWindow() {
+        letterLabels = new ArrayList<JLabel>();
+        keyboardButtons = new ArrayList<JButton>();
+        
+        keys = new ArrayList<Integer>();
+        
+        currentRow = 0;
+        currentColumn = 0;
+    }
+    
+    public void run() {
         int frameWidth = 700;
         frame = new JFrame();
-        frame.setSize(frameWidth, (int) (frameWidth * 1.5));
-        frame.setLocation(100,100);
+        frame.setSize(frameWidth, (int) (frameWidth * 1.2));
+        frame.setLocation(100, 100);
         frame.setTitle("Window Title");
         frame.setResizable(false);
         
@@ -46,37 +65,41 @@ public class GameWindow implements ActionListener, Runnable
         frame.setContentPane(mainPanel);
         mainPanel.setBackground(Color.WHITE);
         
+        JLabel specialText = new JLabel();
+        specialText.setText("© 2025 The New York Times Company | NYTimes.com | Sitemap | Privacy Policy | Terms of Service | Terms of Sale | California Notices");
+        specialText.setLocation(110, 570);
+        specialText.setSize(500, 40);
+        Font specialFont = new Font(Font.SANS_SERIF, Font.BOLD, 8);
+        specialText.setFont(specialFont);
+        mainPanel.add(specialText);
+        
         Color custom = new Color(232, 232, 232);
 
         // Setup text fields and labels
         
-        ArrayList<JTextField> letterFields = new ArrayList<JTextField>();
         Border border = BorderFactory.createLineBorder(custom, 2);
         Font guessFont = new Font(Font.SANS_SERIF, Font.PLAIN, 20);
         
-        int boxSize = 70;
+        int boxSize = 50;
         
-        int marginBetween = 8;
-        int marginVertical = 20;
+        int marginBetween = 6;
+        int marginVertical = 40;
         int marginHorizontal = (frameWidth - (5 * (boxSize + marginBetween)))/2;
         // Set up all text boxes
         for (int row = 0; row < 6; row++) {
             for (int column = 0; column < 5; column++) {
-                letterFields.add(new JTextField());
-                JTextField letterField = letterFields.get((row * 5) + column);
-                letterField.setLocation(marginHorizontal + column*(boxSize + marginBetween), marginVertical + row*(boxSize + marginBetween));
-                letterField.setSize(boxSize, boxSize);
-                letterField.setBorder(border);
-                letterField.setHorizontalAlignment(JTextField.CENTER);
-                letterField.setFont(guessFont);
-                letterField.setEditable(false);
-                letterField.setText("A");
-                letterField.setBackground(Color.WHITE);
-                mainPanel.add(letterField);
+                letterLabels.add(new JLabel());
+                JLabel letterLabel = letterLabels.get((row * 5) + column);
+                letterLabel.setLocation(marginHorizontal + column*(boxSize + marginBetween), marginVertical + row*(boxSize + marginBetween));
+                letterLabel.setSize(boxSize, boxSize);
+                letterLabel.setBorder(border);
+                letterLabel.setHorizontalAlignment(JTextField.CENTER);
+                letterLabel.setFont(guessFont);
+                letterLabel.setBackground(Color.WHITE);
+                mainPanel.add(letterLabel);
             }
         }
         
-        ArrayList<JButton> keyboardButtons = new ArrayList<JButton>();
         String keyboardKeys = "QWERTYUIOPASDFGHJKL@ZXCVBNM&";
         Border keyboardBorder = BorderFactory.createLineBorder(custom, 0);
         Font keyboardFont = new Font(Font.SANS_SERIF, Font.BOLD, 20);
@@ -126,11 +149,41 @@ public class GameWindow implements ActionListener, Runnable
         frame.setVisible(true);
     }
     
-    public void run() {
+    public void actionPerformed(ActionEvent event) {
         
     }
     
-    public void actionPerformed(ActionEvent event) {
+    public void keyPressed(KeyEvent e) {
+        JLabel label = new JLabel();
+        label.setSize(50, 50);
+        label.setSize(50, 200);
+        label.setText(String.valueOf(e.getKeyChar()));
+        mainPanel.add(label);
+        
+        if (e.getKeyChar() == KeyEvent.CHAR_UNDEFINED) {
+            if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+                if (currentColumn != 0) {
+                    currentColumn--;
+                    keys.remove(keys.size() - 1);
+                }
+            } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                if (currentColumn == 4) {
+                    currentRow += 1;
+                    currentColumn = 0;
+                    colorTime();
+                }
+            }
+        } else {
+            JLabel letterLabel = letterLabels.get(currentRow * 5 + currentColumn);
+            letterLabel.setText(String.valueOf(e.getKeyChar()));
+            currentColumn++;
+        }
+        
+    }
+    
+    public void colorTime() {
+        ArrayList<String> lettersRemaining = new ArrayList<String>();
+        //lettersRemaining = targetWord;
         
     }
     
