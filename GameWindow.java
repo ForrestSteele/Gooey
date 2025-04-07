@@ -153,6 +153,23 @@ public class GameWindow implements ActionListener, Runnable
     
     public void actionPerformed(ActionEvent event) {
         //for displayed buttons
+        JButton buttonPressed = (JButton) event.getSource();
+        if (buttonPressed.getText() == "@") {
+            if (currentColumn != 0) {
+                currentColumn--;
+                keys.remove(keys.size() - 1);
+            }
+        } else if (buttonPressed.getText() == "&") {
+            if (currentColumn == 4) {
+                currentRow += 1;
+                currentColumn = 0;
+                colorTime();
+            }
+        } else {
+            JLabel letterLabel = letterLabels.get(currentRow * 5 + currentColumn);
+            letterLabel.setText(String.valueOf(buttonPressed.getText()));
+            currentColumn++;
+        }
     }
     
     public void keyPressed(KeyEvent e) {
@@ -180,11 +197,6 @@ public class GameWindow implements ActionListener, Runnable
             letterLabel.setText(String.valueOf(e.getKeyChar()));
             currentColumn++;
         }
-        
-        if (currentColumn == 4) {
-            colorTime();
-        }
-        
     }
     
     public void colorTime() {
