@@ -27,12 +27,16 @@ import java.awt.event.KeyEvent;
  * @author Forrest Steele, 
  * @version March 2025
  */
-public class GameWindow implements ActionListener, Runnable
+public class GameWindow implements ActionListener, Runnable, KeyListener
 {
     private String targetWord;
     private String guessWord;
     private ArrayList<JLabel> letterLabels;
     private ArrayList<JButton> keyboardButtons;
+    private Color yellow;
+    private Color green;
+    private Color darkGray;
+    private Color lightGray;
     
     private ArrayList<Integer> keys;
 
@@ -51,9 +55,14 @@ public class GameWindow implements ActionListener, Runnable
         currentRow = 0;
         currentColumn = 0;
         
-        targetWord = "tango";
+        targetWord = "TANGO";
+        
+        yellow = new Color(219, 195, 78);
+        green = new Color(89, 192, 63);
+        darkGray = new Color(128, 128, 128);
+        lightGray = new Color(232, 232, 232);
     }
-    
+        
     public void run() {
         int frameWidth = 700;
         frame = new JFrame();
@@ -66,6 +75,8 @@ public class GameWindow implements ActionListener, Runnable
         mainPanel.setLayout(null);
         frame.setContentPane(mainPanel);
         mainPanel.setBackground(Color.WHITE);
+                
+        mainPanel.addKeyListener(this);
         
         JLabel specialText = new JLabel();
         specialText.setText("© 2025 The New York Times Company | NYTimes.com | Sitemap | Privacy Policy | Terms of Service | Terms of Sale | California Notices");
@@ -75,12 +86,10 @@ public class GameWindow implements ActionListener, Runnable
         specialText.setFont(specialFont);
         mainPanel.add(specialText);
         
-        Color custom = new Color(232, 232, 232);
-
         // Setup text fields and labels
         
-        Border border = BorderFactory.createLineBorder(custom, 2);
-        Font guessFont = new Font(Font.SANS_SERIF, Font.PLAIN, 20);
+        Border border = BorderFactory.createLineBorder(lightGray, 2);
+        Font guessFont = new Font(Font.SANS_SERIF, Font.BOLD, 25);
         
         int boxSize = 50;
         
@@ -97,13 +106,14 @@ public class GameWindow implements ActionListener, Runnable
                 letterLabel.setBorder(border);
                 letterLabel.setHorizontalAlignment(JTextField.CENTER);
                 letterLabel.setFont(guessFont);
+                letterLabel.setOpaque(true);
                 letterLabel.setBackground(Color.WHITE);
                 mainPanel.add(letterLabel);
             }
         }
         
         String keyboardKeys = "QWERTYUIOPASDFGHJKL@ZXCVBNM&";
-        Border keyboardBorder = BorderFactory.createLineBorder(custom, 1);
+        Border keyboardBorder = BorderFactory.createLineBorder(lightGray, 1);
         Font keyboardFont = new Font(Font.SANS_SERIF, Font.BOLD, 20);
         
         //firstRowOfLetters
@@ -114,9 +124,10 @@ public class GameWindow implements ActionListener, Runnable
             JButton keyboardButton = keyboardButtons.get(letter);
             keyboardButton.setLocation(letterMargin + letter * (letterBoxSize + marginBetween), marginVertical + (boxSize + marginBetween) * 6 + 20);
             keyboardButton.setSize(letterBoxSize, letterBoxSize);
-            keyboardButton.setBackground(custom);
+            keyboardButton.setBackground(lightGray);
             keyboardButton.setBorder(keyboardBorder);
             keyboardButton.setFont(keyboardFont);
+            keyboardButton.addActionListener(this);
             mainPanel.add(keyboardButton);
         }
         
@@ -128,9 +139,10 @@ public class GameWindow implements ActionListener, Runnable
             JButton keyboardButton = keyboardButtons.get(10 + letter);
             keyboardButton.setLocation(letterMargin + letter * (letterBoxSize + marginBetween), marginVertical + (boxSize + marginBetween) * 6 + 20 + (letterBoxSize + marginBetween));
             keyboardButton.setSize(letterBoxSize, letterBoxSize);
-            keyboardButton.setBackground(custom);
+            keyboardButton.setBackground(lightGray);
             keyboardButton.setBorder(keyboardBorder);
             keyboardButton.setFont(keyboardFont);
+            keyboardButton.addActionListener(this);
             mainPanel.add(keyboardButton);
         }
         
@@ -142,9 +154,10 @@ public class GameWindow implements ActionListener, Runnable
             JButton keyboardButton = keyboardButtons.get(19 + letter);
             keyboardButton.setLocation(letterMargin + letter * (letterBoxSize + marginBetween), marginVertical + (boxSize + marginBetween) * 6 + 20 + (letterBoxSize + marginBetween) * 2);
             keyboardButton.setSize(letterBoxSize, letterBoxSize);
-            keyboardButton.setBackground(custom);
+            keyboardButton.setBackground(lightGray);
             keyboardButton.setBorder(keyboardBorder);
             keyboardButton.setFont(keyboardFont);
+            keyboardButton.addActionListener(this);
             mainPanel.add(keyboardButton);
         }
         
@@ -153,25 +166,36 @@ public class GameWindow implements ActionListener, Runnable
     
     public void actionPerformed(ActionEvent event) {
         //for displayed buttons
+        Border typedBorder = BorderFactory.createLineBorder(darkGray, 2);
+        Border untypedBorder = BorderFactory.createLineBorder(lightGray, 2);
+        
         JButton buttonPressed = (JButton) event.getSource();
-        if (buttonPressed.getText() == "@") {
+        if (buttonPressed.getText().equals("&")) {
             if (currentColumn != 0) {
                 currentColumn--;
-                keys.remove(keys.size() - 1);
+                JLabel letterLabel = letterLabels.get(currentRow * 5 + currentColumn);
+                letterLabel.setText("");
+                letterLabel.setBorder(untypedBorder);
+                keys.remove(keys.size() - 1); //idk why I wrote this
             }
-        } else if (buttonPressed.getText() == "&") {
-            if (currentColumn == 4) {
+        } else if (buttonPressed.getText().equals("@")) {
+            if (currentColumn == 5) {
+                colorTime();
+                
                 currentRow += 1;
                 currentColumn = 0;
-                colorTime();
             }
         } else {
-            JLabel letterLabel = letterLabels.get(currentRow * 5 + currentColumn);
-            letterLabel.setText(String.valueOf(buttonPressed.getText()));
-            currentColumn++;
+            if (currentColumn < 5) {
+                JLabel letterLabel = letterLabels.get(currentRow * 5 + currentColumn);
+                letterLabel.setText(String.valueOf(buttonPressed.getText()));
+                letterLabel.setBorder(typedBorder);
+                currentColumn++;
+            }
         }
     }
     
+    @Override
     public void keyPressed(KeyEvent e) {
         JLabel label = new JLabel();
         label.setSize(50, 50);
@@ -187,9 +211,10 @@ public class GameWindow implements ActionListener, Runnable
                 }
             } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                 if (currentColumn == 4) {
-                    currentRow += 1;
-                    currentColumn = 0;
                     colorTime();
+                    
+                    currentColumn = 0;
+                    currentRow += 1;
                 }
             }
         } else {
@@ -199,42 +224,82 @@ public class GameWindow implements ActionListener, Runnable
         }
     }
     
+    @Override
+    public void keyReleased(KeyEvent e) {
+        
+    }
+    
+    @Override
+    public void keyTyped(KeyEvent e) {
+        
+    }
+    
     public void colorTime() {
         ArrayList<String> lettersRemaining = new ArrayList<String>();
         ArrayList<String> targetWordList = new ArrayList<String>();
         ArrayList<String> guessWordList = new ArrayList<String>();
         //lettersRemaining = targetWord;
         
-        for (int i = 0; i < 4; i++) {
+        Border processedBorder = BorderFactory.createLineBorder(Color.WHITE, 0);
+                
+        for (int i = 0; i < 5; i++) {
             JLabel current = letterLabels.get(currentRow * 5 + i);
-            lettersRemaining.add(current.getText());
             guessWordList.add(current.getText());
         }
         
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 5; i++) {
             targetWordList.add(targetWord.substring(i, i + 1));
+            lettersRemaining.add(targetWord.substring(i, i + 1));
         }
         
-        int currIndex = 0;
-        while (lettersRemaining.size() > 0) {
-            String currLetter = lettersRemaining.get(currIndex);
+        for (int i = 0; i < 5; i++) {
+            String currLetter = guessWordList.get(i);
             
             int targetIndex = targetWordList.indexOf(currLetter);
             int guessIndex = guessWordList.indexOf(currLetter);
             
-            Color color = Color.DARK_GRAY;
+            Color color = darkGray;
             
             if (targetIndex != -1) {
                 if (targetIndex == guessIndex) {
-                    color = Color.GREEN;
+                    color = green;
+                    lettersRemaining.remove(currLetter);
                 } else {
-                    color = Color.YELLOW;
+                    if (lettersRemaining.contains(currLetter)) {
+                        System.out.println(lettersRemaining);
+                        color = yellow;
+                        lettersRemaining.remove(currLetter);
+                    }
                 }
             }
-            //fill out more cases
             
-            letterLabels.get(currentRow * 5 + currIndex).setBackground(color);
+            JLabel letterLabel = letterLabels.get(currentRow * 5 + i);
+            letterLabel.setBackground(color);
+            letterLabel.setForeground(Color.WHITE);
+            letterLabel.setBorder(processedBorder);
+            
         }
+        
+        // int currIndex = 0;
+        // while (lettersRemaining.size() > 0) {
+            // String currLetter = lettersRemaining.get(currIndex);
+            
+            // int targetIndex = targetWordList.indexOf(currLetter);
+            // int guessIndex = guessWordList.indexOf(currLetter);
+            
+            // Color color = Color.DARK_GRAY;
+            
+            // if (targetIndex != -1) {
+                // if (targetIndex == guessIndex) {
+                    // color = Color.GREEN;
+                // } else {
+                    // color = Color.YELLOW;
+                // }
+            // }
+            // //fill out more cases
+            
+            // letterLabels.get(currentRow * 5 + currIndex).setBackground(color);
+        // }
     }
     
     public static void start() {
