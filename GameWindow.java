@@ -20,6 +20,8 @@ import javax.swing.BorderFactory;
 import javax.swing.border.Border;
 import java.awt.event.KeyListener;
 import java.awt.event.KeyEvent;
+import java.io.BufferedReader;
+import java.io.FileReader;
 
 /**
  * Provides methods to construct and manipulate the main game window. 
@@ -37,6 +39,11 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
     private Color green;
     private Color darkGray;
     private Color lightGray;
+    private String target;
+    
+    private String currentWord;
+    
+    private ArrayList<String> guessWords;
     
     private ArrayList<Integer> keys;
 
@@ -55,12 +62,47 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
         currentRow = 0;
         currentColumn = 0;
         
-        targetWord = "TANGO";
+        target = "TANGO";
         
         yellow = new Color(219, 195, 78);
         green = new Color(89, 192, 63);
         darkGray = new Color(128, 128, 128);
         lightGray = new Color(232, 232, 232);
+        
+        ArrayList<String> targetWords = new ArrayList<>();
+        
+        try {
+            FileReader fileReader = new FileReader("wordle-game-words.txt");
+        
+            BufferedReader reader = new BufferedReader(fileReader);  
+        
+            String line = reader.readLine();
+          
+            while ((line = reader.readLine()) != null) {  
+                targetWords.add(line.toUpperCase());
+            }
+        } catch (Exception E) {}
+        
+        int randomIndex = (int) (Math.random() * targetWords.size()) + 1;
+        
+        targetWord = targetWords.get(randomIndex);
+        
+        
+        guessWords = new ArrayList<>();
+        
+        try {
+            FileReader fileReader = new FileReader("wordle-game-words.txt");
+        
+            BufferedReader reader = new BufferedReader(fileReader);  
+        
+            String line = reader.readLine();
+          
+            while ((line = reader.readLine()) != null) {  
+                guessWords.add(line.toUpperCase());
+            }
+        } catch (Exception E) {}
+        
+        currentWord = "";
     }
         
     public void run() {
@@ -75,8 +117,6 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
         mainPanel.setLayout(null);
         frame.setContentPane(mainPanel);
         mainPanel.setBackground(Color.WHITE);
-                
-        mainPanel.addKeyListener(this);
         
         JLabel specialText = new JLabel();
         specialText.setText("© 2025 The New York Times Company | NYTimes.com | Sitemap | Privacy Policy | Terms of Service | Terms of Sale | California Notices");
@@ -162,6 +202,10 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
         }
         
         frame.setVisible(true);
+        
+        mainPanel.addKeyListener(this);
+        mainPanel.setFocusable(true);
+        mainPanel.requestFocusInWindow();
     }
     
     public void actionPerformed(ActionEvent event) {
@@ -172,6 +216,7 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
         JButton buttonPressed = (JButton) event.getSource();
         if (buttonPressed.getText().equals("&")) {
             if (currentColumn != 0) {
+                currentWord = currentWord.substring(0, currentColumn - 1);
                 currentColumn--;
                 JLabel letterLabel = letterLabels.get(currentRow * 5 + currentColumn);
                 letterLabel.setText("");
@@ -180,10 +225,16 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
             }
         } else if (buttonPressed.getText().equals("@")) {
             if (currentColumn == 5) {
-                colorTime();
+                System.out.println(currentWord);
+                if (guessWords.contains(currentWord)) {
+                    colorTime();
                 
-                currentRow += 1;
-                currentColumn = 0;
+                    currentRow += 1;
+                    currentColumn = 0;
+                    
+                    currentWord = "";
+                    
+                }
             }
         } else {
             if (currentColumn < 5) {
@@ -191,6 +242,8 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
                 letterLabel.setText(String.valueOf(buttonPressed.getText()));
                 letterLabel.setBorder(typedBorder);
                 currentColumn++;
+                
+                currentWord += buttonPressed.getText();
             }
         }
     }
@@ -202,6 +255,7 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
         label.setSize(50, 200);
         label.setText(String.valueOf(e.getKeyChar()));
         mainPanel.add(label);
+        System.out.println("poop");
         
         if (e.getKeyChar() == KeyEvent.CHAR_UNDEFINED) {
             if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
@@ -266,7 +320,7 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
                     lettersRemaining.remove(currLetter);
                 } else {
                     if (lettersRemaining.contains(currLetter)) {
-                        System.out.println(lettersRemaining);
+
                         color = yellow;
                         lettersRemaining.remove(currLetter);
                     }
