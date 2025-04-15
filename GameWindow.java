@@ -454,7 +454,8 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
         for (int i = 0; i < 5; i++) {
             String currLetter = guessWordList.get(i);
             
-            if (lettersRemaining.contains(currLetter)) {
+            if (lettersRemaining.contains(currLetter) && !targetWordList.get(i).equals(
+            guessWordList.get(i))) {
                 lettersRemaining.remove(currLetter);
                 
                 JLabel letterLabel = letterLabels.get(currentRow * 5 + i);
