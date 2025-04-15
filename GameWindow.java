@@ -23,6 +23,7 @@ import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import javax.swing.SwingConstants;
+import javax.swing.Timer;
 
 /**
  * Provides methods to construct and manipulate the main game window. 
@@ -55,9 +56,16 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
     private JLabel startButton;
     
     private Font popUpsFont;
+    private Font commandsFont;
+    private Font guessFont;
+    private Font letterButtonsFont;
+
     
     private Border typedBorder;
     private Border untypedBorder;
+    private Border letterLabelsBorder;
+    private Border letterButtonsBorder;
+    private Border processedBorder;
     
     JFrame frame;
     JPanel mainPanel;
@@ -66,26 +74,37 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
     private int currentColumn;
     
     public GameWindow() {
+        //setting up lists of letter labels and buttons
         letterLabels = new ArrayList<JLabel>();
         letterButtons = new ArrayList<JButton>();
         
+        //initilizing current row and columnn to zero
         currentRow = 0;
         currentColumn = 0;
-        
-        target = "TANGO";
-        
-        yellow = new Color(219, 195, 78);
-        green = new Color(89, 192, 63);
-        darkGray = new Color(128, 128, 128);
+                
+        //colors
+        yellow = new Color(200, 182, 83);
+        green = new Color(108, 169, 101);
+        darkGray = new Color(120, 124, 127);
         lightGray = new Color(232, 232, 232);
         
+        //letters complete string
         letters = "QWERTYUIOPASDFGHJKLZXCVBNM";
         
+        //fonts
         popUpsFont = new Font(Font.SANS_SERIF, Font.BOLD, 10);
-        
+        commandsFont = new Font(Font.SANS_SERIF, Font.BOLD, 10);
+        guessFont = new Font(Font.SANS_SERIF, Font.BOLD, 25);
+        letterButtonsFont = new Font(Font.SANS_SERIF, Font.BOLD, 20);
+
+        //borders
         typedBorder = BorderFactory.createLineBorder(darkGray, 2);
         untypedBorder = BorderFactory.createLineBorder(lightGray, 2);
-        
+        letterLabelsBorder = BorderFactory.createLineBorder(lightGray, 2);
+        letterButtonsBorder = BorderFactory.createLineBorder(lightGray, 0);
+        processedBorder = BorderFactory.createLineBorder(Color.WHITE, 0);
+
+        //finding target word
         ArrayList<String> targetWords = new ArrayList<>();
         try {
             FileReader fileReader = new FileReader("wordle-game-words.txt");
@@ -97,12 +116,15 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
             }
         } catch (Exception E) {}
         
-        int randomIndex = (int) (Math.random() * targetWords.size()) + 1;
+        int randomIndex = (int) (Math.random() * targetWords.size()) + 0;
         targetWord = targetWords.get(randomIndex);
         
+        System.out.println(targetWord);
+                
+        //creating list of all possible guess words
         guessWords = new ArrayList<>();
         try {
-            FileReader fileReader = new FileReader("wordle-game-words.txt");
+            FileReader fileReader = new FileReader("wordle-guess-words.txt");
             BufferedReader reader = new BufferedReader(fileReader);  
             String line = reader.readLine();
           
@@ -115,6 +137,8 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
     }
         
     public void run() {
+        
+        //setting up frame and panel
         int frameWidth = 700;
         frame = new JFrame();
         frame.setSize(frameWidth, (int) (frameWidth * 1.2));
@@ -127,8 +151,10 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
         frame.setContentPane(mainPanel);
         mainPanel.setBackground(Color.WHITE);
         
+        //margin from top
         int marginVertical = 100;
         
+        //adding description text
         JLabel specialText = new JLabel();
         specialText.setText("© 2025 The New York Times Company | NYTimes.com | Sitemap | Privacy Policy | Terms of Service | Terms of Sale | California Notices");
         specialText.setLocation(88, 530 + marginVertical);
@@ -137,7 +163,7 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
         specialText.setFont(specialFont);
         mainPanel.add(specialText);
         
-        // PopUps for invalid guess word, win, and loss
+        //pop ups for invalid guess word, win, and loss
         invalidGuessLabel = new JLabel();
         invalidGuessLabel.setLocation(300, 35);
         invalidGuessLabel.setSize(100, 35);
@@ -148,10 +174,20 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
         invalidGuessLabel.setForeground(Color.WHITE);
         invalidGuessLabel.setHorizontalAlignment(SwingConstants.CENTER);
         
+        ArrayList<String> winStatements = new ArrayList<String>();
+        winStatements.add("Splendid");
+        winStatements.add("Impressive");
+        winStatements.add("Phew");
+        winStatements.add("Genius");
+        winStatements.add("Magnificent");
+        winStatements.add("Great");
+        
+        int randomIndex = (int) (Math.random() * winStatements.size()) + 0;
+        
         winLabel = new JLabel();
         winLabel.setLocation(300, 35);
         winLabel.setSize(100, 35);
-        winLabel.setText("You win :)");
+        winLabel.setText(winStatements.get(randomIndex));
         winLabel.setBackground(Color.BLACK);
         winLabel.setOpaque(true);
         winLabel.setFont(popUpsFont);
@@ -160,19 +196,15 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
         
         loseLabel = new JLabel();
         loseLabel.setLocation(300, 35);
-        loseLabel.setSize(100, 35);
-        loseLabel.setText("You lose :(");
+        loseLabel.setSize(70, 35);
+        loseLabel.setText(targetWord);
         loseLabel.setBackground(Color.BLACK);
         loseLabel.setOpaque(true);
         loseLabel.setFont(popUpsFont);
         loseLabel.setForeground(Color.WHITE);
         loseLabel.setHorizontalAlignment(SwingConstants.CENTER);
         
-        // Setup text fields and labels
-        
-        Border border = BorderFactory.createLineBorder(lightGray, 2);
-        Font guessFont = new Font(Font.SANS_SERIF, Font.BOLD, 25);
-        
+        //setting up letter labels
         int boxSize = 50;
         
         int marginBetween = 6;
@@ -184,7 +216,7 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
                 JLabel letterLabel = letterLabels.get((row * 5) + column);
                 letterLabel.setLocation(marginHorizontal + column*(boxSize + marginBetween), marginVertical + row*(boxSize + marginBetween));
                 letterLabel.setSize(boxSize, boxSize);
-                letterLabel.setBorder(border);
+                letterLabel.setBorder(letterLabelsBorder);
                 letterLabel.setHorizontalAlignment(JTextField.CENTER);
                 letterLabel.setFont(guessFont);
                 letterLabel.setOpaque(true);
@@ -193,9 +225,7 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
             }
         }
         
-        Border keyboardBorder = BorderFactory.createLineBorder(lightGray, 0);
-        Font keyboardFont = new Font(Font.SANS_SERIF, Font.BOLD, 20);
-        
+        //setting up letter buttons
         //firstRowOfLetters
         for (int letter = 0; letter < 10; letter++) {
             int letterBoxSize = 50;
@@ -206,8 +236,8 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
             letterButton.setSize(letterBoxSize, letterBoxSize);
             letterButton.setBackground(lightGray);
             letterButton.setOpaque(true);
-            letterButton.setBorder(keyboardBorder);
-            letterButton.setFont(keyboardFont);
+            letterButton.setBorder(letterButtonsBorder);
+            letterButton.setFont(letterButtonsFont);
             letterButton.addActionListener(this);
             mainPanel.add(letterButton);
         }
@@ -222,8 +252,8 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
             letterButton.setSize(letterBoxSize, letterBoxSize);
             letterButton.setBackground(lightGray);
             letterButton.setOpaque(true);
-            letterButton.setBorder(keyboardBorder);
-            letterButton.setFont(keyboardFont);
+            letterButton.setBorder(letterButtonsBorder);
+            letterButton.setFont(letterButtonsFont);
             letterButton.addActionListener(this);
             mainPanel.add(letterButton);
         }
@@ -238,14 +268,14 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
             letterButton.setSize(letterBoxSize, letterBoxSize);
             letterButton.setBackground(lightGray);
             letterButton.setOpaque(true);
-            letterButton.setBorder(keyboardBorder);
-            letterButton.setFont(keyboardFont);
+            letterButton.setBorder(letterButtonsBorder);
+            letterButton.setFont(letterButtonsFont);
             letterButton.addActionListener(this);
             mainPanel.add(letterButton);
         }
         
-        int commandsKeyWidth = 80; 
-        Font commandsFont = new Font(Font.SANS_SERIF, Font.BOLD, 10);
+        //setting up commands keys: enter and delete
+        int commandsKeyWidth = 80;
 
         letterButtons.add(new JButton("ENTER"));
         JButton enterButton = letterButtons.get(26);
@@ -253,7 +283,7 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
         enterButton.setSize(80, 50);
         enterButton.setBackground(lightGray);
         enterButton.setOpaque(true);
-        enterButton.setBorder(keyboardBorder);
+        enterButton.setBorder(letterButtonsBorder);
         enterButton.setFont(commandsFont);
         enterButton.addActionListener(this);
         mainPanel.add(enterButton);
@@ -264,17 +294,17 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
         deleteButton.setSize(80, 50);
         deleteButton.setBackground(lightGray);
         deleteButton.setOpaque(true);
-        deleteButton.setBorder(keyboardBorder);
+        deleteButton.setBorder(letterButtonsBorder);
         deleteButton.setFont(commandsFont);
         deleteButton.addActionListener(this);
         mainPanel.add(deleteButton);
         
+        //finishing frame set up, adding KeyListener, and focusing into mainPanel
         frame.setVisible(true);
         
         mainPanel.addKeyListener(this);
         mainPanel.setFocusable(true);
         mainPanel.requestFocusInWindow();
-        
     }
     
     public void actionPerformed(ActionEvent event) {
@@ -293,7 +323,6 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
             }
         } else if (buttonPressed.getText().equals("ENTER")) {
             if (currentColumn == 5) {
-                System.out.println(currentWord);
                 if (guessWords.contains(currentWord)) {
                     colorTime();
                 
@@ -335,7 +364,6 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
             }
         } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
             if (currentColumn == 5) {
-                System.out.println(currentWord);
                 if (guessWords.contains(currentWord)) {
                     colorTime();
                     
@@ -375,10 +403,7 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
         ArrayList<String> lettersRemaining = new ArrayList<String>();
         ArrayList<String> targetWordList = new ArrayList<String>();
         ArrayList<String> guessWordList = new ArrayList<String>();
-        //lettersRemaining = targetWord;
-        
-        Border processedBorder = BorderFactory.createLineBorder(Color.WHITE, 0);
-                
+                        
         for (int i = 0; i < 5; i++) {
             JLabel current = letterLabels.get(currentRow * 5 + i);
             guessWordList.add(current.getText());
@@ -389,25 +414,18 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
             lettersRemaining.add(targetWord.substring(i, i + 1));
         }
         
+        //first run through completely and check for correctly placed letters. Running completely through
+        //for this makes it so that there won't be a letter marked yellow that comes before a duplicate letter
+        //that comes later and is correctly placed and marked green. Ex. with target word "PULSE", the 
+        //guess word "SALSA" should NOT highlight the first "S" yellow, instead only the second "S" green. 
         for (int i = 0; i < 5; i++) {
             String currLetter = guessWordList.get(i);
-            
-            int targetIndex = targetWordList.indexOf(currLetter);
-            int guessIndex = guessWordList.indexOf(currLetter);
-            
+                        
             Color color = darkGray;
             
-            if (targetIndex != -1) {
-                if (targetIndex == guessIndex) {
-                    color = green;
-                    lettersRemaining.remove(currLetter);
-                } else {
-                    if (lettersRemaining.contains(currLetter)) {
-
-                        color = yellow;
-                        lettersRemaining.remove(currLetter);
-                    }
-                }
+            if (targetWordList.get(i).equals(guessWordList.get(i))) {
+                color = green;
+                lettersRemaining.remove(currLetter);
             }
             
             JLabel letterLabel = letterLabels.get(currentRow * 5 + i);
@@ -420,16 +438,39 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
             letterButton.setForeground(Color.WHITE);
         }
         
-        if (targetWordList.equals(guessWordList)) {
+        //run again to check for letters that do exist in letters remanining, note - won't replace correctly
+        //placed letters because if they are marked as green they are taken out of letters remaining list. 
+        //Yet note, this loop only CHANGES letters from grey (set in prev loop) to yellow. This loop does not
+        //have a starting color of grey or else with duplicate letters it (ex. target "ADEEM", and guess "FEEDS")
+        //the second "E" which is marked as green in first loop would be changed to grey in second loop because
+        //by that point both "E"'s would be taken out of letters remaining list.
+        for (int i = 0; i < 5; i++) {
+            String currLetter = guessWordList.get(i);
+            
+            if (lettersRemaining.contains(currLetter)) {
+                lettersRemaining.remove(currLetter);
+                
+                JLabel letterLabel = letterLabels.get(currentRow * 5 + i);
+                letterLabel.setBackground(yellow);
+                letterLabel.setForeground(Color.WHITE);
+                letterLabel.setBorder(processedBorder);
+                
+                JButton letterButton = letterButtons.get(letters.indexOf(currLetter));
+                letterButton.setBackground(yellow);
+                letterButton.setForeground(Color.WHITE);
+            }
+        }
+        
+        if (targetWord.equals(currentWord)) {
             mainPanel.add(winLabel);
             mainPanel.repaint();
+            mainPanel.removeKeyListener(this); //prevent further typing
         }
         
         if (currentRow == 5) {
             mainPanel.add(loseLabel);
             mainPanel.repaint();
         }
-        
     }
     
     public static void start() {
