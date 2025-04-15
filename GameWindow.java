@@ -1,4 +1,4 @@
-
+//0987654321098765432109876543210987654321098765432109876543210987654321098765432109876543210987654321
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -33,21 +33,20 @@ import javax.swing.Timer;
  */
 public class GameWindow implements ActionListener, Runnable, KeyListener
 {
-    private String targetWord;
-    private String guessWord;
     private ArrayList<JLabel> letterLabels;
     private ArrayList<JButton> letterButtons;
+    
+    private ArrayList<String> guessWords;
+    
+    private String targetWord;
+    private String guessWord;
+    private String currentWord;
+    private String letters;
+    
     private Color yellow;
     private Color green;
     private Color darkGray;
     private Color lightGray;
-    private String target;
-    
-    private String currentWord;
-    
-    private ArrayList<String> guessWords;
-    
-    private String letters;
     
     private JLabel invalidGuessLabel;
     private JLabel loseLabel;
@@ -60,15 +59,14 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
     private Font guessFont;
     private Font letterButtonsFont;
 
-    
     private Border typedBorder;
     private Border untypedBorder;
     private Border letterLabelsBorder;
     private Border letterButtonsBorder;
     private Border processedBorder;
     
-    JFrame frame;
-    JPanel mainPanel;
+    private JFrame frame;
+    private JPanel mainPanel;
     
     private int currentRow;
     private int currentColumn;
@@ -157,8 +155,8 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
         //adding description text
         JLabel specialText = new JLabel();
         specialText.setText("© 2025 The New York Times Company | NYTimes.com | Sitemap | Privacy Policy | Terms of Service | Terms of Sale | California Notices");
-        specialText.setLocation(88, 530 + marginVertical);
-        specialText.setSize(590, 40);
+        specialText.setLocation(92, 530 + marginVertical + 135);
+        specialText.setSize(515, 40);
         Font specialFont = new Font(Font.DIALOG, Font.PLAIN, 8);
         specialText.setFont(specialFont);
         mainPanel.add(specialText);
@@ -214,7 +212,8 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
             for (int column = 0; column < 5; column++) {
                 letterLabels.add(new JLabel());
                 JLabel letterLabel = letterLabels.get((row * 5) + column);
-                letterLabel.setLocation(marginHorizontal + column*(boxSize + marginBetween), marginVertical + row*(boxSize + marginBetween));
+                letterLabel.setLocation(marginHorizontal + column*(boxSize + marginBetween), 
+                marginVertical + row*(boxSize + marginBetween));
                 letterLabel.setSize(boxSize, boxSize);
                 letterLabel.setBorder(letterLabelsBorder);
                 letterLabel.setHorizontalAlignment(JTextField.CENTER);
@@ -232,7 +231,8 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
             int letterMargin = (frameWidth - (letterBoxSize + marginBetween) * 10)/2;
             letterButtons.add(new JButton(letters.substring(letter, letter + 1)));
             JButton letterButton = letterButtons.get(letter);
-            letterButton.setLocation(letterMargin + letter * (letterBoxSize + marginBetween), marginVertical + (boxSize + marginBetween) * 6 + 20);
+            letterButton.setLocation(letterMargin + letter * (letterBoxSize + marginBetween), 
+            marginVertical + (boxSize + marginBetween) * 6 + 20);
             letterButton.setSize(letterBoxSize, letterBoxSize);
             letterButton.setBackground(lightGray);
             letterButton.setOpaque(true);
@@ -248,7 +248,8 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
             int letterMargin = (frameWidth - (letterBoxSize + marginBetween) * 9)/2;
             letterButtons.add(new JButton(letters.substring(10 + letter, 10 + letter + 1)));
             JButton letterButton = letterButtons.get(10 + letter);
-            letterButton.setLocation(letterMargin + letter * (letterBoxSize + marginBetween), marginVertical + (boxSize + marginBetween) * 6 + 20 + (letterBoxSize + marginBetween));
+            letterButton.setLocation(letterMargin + letter * (letterBoxSize + marginBetween), 
+            marginVertical + (boxSize + marginBetween) * 6 + 20 + (letterBoxSize + marginBetween));
             letterButton.setSize(letterBoxSize, letterBoxSize);
             letterButton.setBackground(lightGray);
             letterButton.setOpaque(true);
@@ -264,7 +265,9 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
             int letterMargin = (frameWidth - (letterBoxSize + marginBetween) * 9)/2;
             letterButtons.add(new JButton(letters.substring(19 + letter, 19 + letter + 1)));
             JButton letterButton = letterButtons.get(19 + letter);
-            letterButton.setLocation(letterMargin + letterBoxSize + marginBetween + letter * (letterBoxSize + marginBetween), marginVertical + (boxSize + marginBetween) * 6 + 20 + (letterBoxSize + marginBetween) * 2);
+            letterButton.setLocation(letterMargin + letterBoxSize + marginBetween + letter * 
+            (letterBoxSize + marginBetween), marginVertical + (boxSize + marginBetween) * 6 + 20 + 
+            (letterBoxSize + marginBetween) * 2);
             letterButton.setSize(letterBoxSize, letterBoxSize);
             letterButton.setBackground(lightGray);
             letterButton.setOpaque(true);
@@ -279,7 +282,8 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
 
         letterButtons.add(new JButton("ENTER"));
         JButton enterButton = letterButtons.get(26);
-        enterButton.setLocation(68, marginVertical + (boxSize + marginBetween) * 6 + 20 + (50 + marginBetween) * 2);
+        enterButton.setLocation(68, marginVertical + (boxSize + marginBetween) * 6 + 20 + 
+        (50 + marginBetween) * 2);
         enterButton.setSize(80, 50);
         enterButton.setBackground(lightGray);
         enterButton.setOpaque(true);
@@ -290,7 +294,8 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
         
         letterButtons.add(new JButton("DELETE"));
         JButton deleteButton = letterButtons.get(27);
-        deleteButton.setLocation(546, marginVertical + (boxSize + marginBetween) * 6 + 20 + (50 + marginBetween) * 2);
+        deleteButton.setLocation(546, marginVertical + (boxSize + marginBetween) * 6 + 20 + 
+        (50 + marginBetween) * 2);
         deleteButton.setSize(80, 50);
         deleteButton.setBackground(lightGray);
         deleteButton.setOpaque(true);
@@ -414,10 +419,11 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
             lettersRemaining.add(targetWord.substring(i, i + 1));
         }
         
-        //first run through completely and check for correctly placed letters. Running completely through
-        //for this makes it so that there won't be a letter marked yellow that comes before a duplicate letter
-        //that comes later and is correctly placed and marked green. Ex. with target word "PULSE", the 
-        //guess word "SALSA" should NOT highlight the first "S" yellow, instead only the second "S" green. 
+        //first run through completely and check for correctly placed letters. Running completely 
+        //through for this makes it so that there won't be a letter marked yellow that comes before 
+        //a duplicate letter that comes later and is correctly placed and marked green. Ex. with 
+        //target word "PULSE", the guess word "SALSA" should NOT highlight the first "S" yellow, 
+        //instead only the second "S" green. 
         for (int i = 0; i < 5; i++) {
             String currLetter = guessWordList.get(i);
                         
@@ -438,12 +444,13 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
             letterButton.setForeground(Color.WHITE);
         }
         
-        //run again to check for letters that do exist in letters remanining, note - won't replace correctly
-        //placed letters because if they are marked as green they are taken out of letters remaining list. 
-        //Yet note, this loop only CHANGES letters from grey (set in prev loop) to yellow. This loop does not
-        //have a starting color of grey or else with duplicate letters it (ex. target "ADEEM", and guess "FEEDS")
-        //the second "E" which is marked as green in first loop would be changed to grey in second loop because
-        //by that point both "E"'s would be taken out of letters remaining list.
+        //run again to check for letters that do exist in letters remanining, note - won't replace 
+        //correctly placed letters because if they are marked as green they are taken out of letters 
+        //remaining list. Yet note, this loop only CHANGES letters from grey (set in prev loop) to 
+        //yellow. This loop does not have a starting color of grey or else with duplicate letters 
+        //it (ex. target "ADEEM", and guess "FEEDS") the second "E" which is marked as green in 
+        //first loop would be changed to grey in second loop because by that point both "E"'s would 
+        //be taken out of letters remaining list.
         for (int i = 0; i < 5; i++) {
             String currLetter = guessWordList.get(i);
             
