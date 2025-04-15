@@ -22,6 +22,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import javax.swing.SwingConstants;
 
 /**
  * Provides methods to construct and manipulate the main game window. 
@@ -34,7 +35,7 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
     private String targetWord;
     private String guessWord;
     private ArrayList<JLabel> letterLabels;
-    private ArrayList<JButton> keyboardButtons;
+    private ArrayList<JButton> letterButtons;
     private Color yellow;
     private Color green;
     private Color darkGray;
@@ -45,8 +46,19 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
     
     private ArrayList<String> guessWords;
     
-    private ArrayList<Integer> keys;
-
+    private String letters;
+    
+    private JLabel invalidGuessLabel;
+    private JLabel loseLabel;
+    private JLabel winLabel;
+    
+    private JLabel startButton;
+    
+    private Font popUpsFont;
+    
+    private Border typedBorder;
+    private Border untypedBorder;
+    
     JFrame frame;
     JPanel mainPanel;
     
@@ -55,9 +67,7 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
     
     public GameWindow() {
         letterLabels = new ArrayList<JLabel>();
-        keyboardButtons = new ArrayList<JButton>();
-        
-        keys = new ArrayList<Integer>();
+        letterButtons = new ArrayList<JButton>();
         
         currentRow = 0;
         currentColumn = 0;
@@ -69,32 +79,31 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
         darkGray = new Color(128, 128, 128);
         lightGray = new Color(232, 232, 232);
         
-        ArrayList<String> targetWords = new ArrayList<>();
+        letters = "QWERTYUIOPASDFGHJKLZXCVBNM";
         
+        popUpsFont = new Font(Font.SANS_SERIF, Font.BOLD, 10);
+        
+        typedBorder = BorderFactory.createLineBorder(darkGray, 2);
+        untypedBorder = BorderFactory.createLineBorder(lightGray, 2);
+        
+        ArrayList<String> targetWords = new ArrayList<>();
         try {
             FileReader fileReader = new FileReader("wordle-game-words.txt");
-        
             BufferedReader reader = new BufferedReader(fileReader);  
-        
             String line = reader.readLine();
-          
+            
             while ((line = reader.readLine()) != null) {  
                 targetWords.add(line.toUpperCase());
             }
         } catch (Exception E) {}
         
         int randomIndex = (int) (Math.random() * targetWords.size()) + 1;
-        
         targetWord = targetWords.get(randomIndex);
         
-        
         guessWords = new ArrayList<>();
-        
         try {
             FileReader fileReader = new FileReader("wordle-game-words.txt");
-        
             BufferedReader reader = new BufferedReader(fileReader);  
-        
             String line = reader.readLine();
           
             while ((line = reader.readLine()) != null) {  
@@ -112,19 +121,52 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
         frame.setLocation(100, 100);
         frame.setTitle("Window Title");
         frame.setResizable(false);
-        
+
         mainPanel = new JPanel();
         mainPanel.setLayout(null);
         frame.setContentPane(mainPanel);
         mainPanel.setBackground(Color.WHITE);
         
+        int marginVertical = 100;
+        
         JLabel specialText = new JLabel();
         specialText.setText("© 2025 The New York Times Company | NYTimes.com | Sitemap | Privacy Policy | Terms of Service | Terms of Sale | California Notices");
-        specialText.setLocation(110, 570);
-        specialText.setSize(500, 40);
-        Font specialFont = new Font(Font.SANS_SERIF, Font.BOLD, 8);
+        specialText.setLocation(88, 530 + marginVertical);
+        specialText.setSize(590, 40);
+        Font specialFont = new Font(Font.DIALOG, Font.PLAIN, 8);
         specialText.setFont(specialFont);
         mainPanel.add(specialText);
+        
+        // PopUps for invalid guess word, win, and loss
+        invalidGuessLabel = new JLabel();
+        invalidGuessLabel.setLocation(300, 35);
+        invalidGuessLabel.setSize(100, 35);
+        invalidGuessLabel.setText("Not in word list");
+        invalidGuessLabel.setBackground(Color.BLACK);
+        invalidGuessLabel.setOpaque(true);
+        invalidGuessLabel.setFont(popUpsFont);
+        invalidGuessLabel.setForeground(Color.WHITE);
+        invalidGuessLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        
+        winLabel = new JLabel();
+        winLabel.setLocation(300, 35);
+        winLabel.setSize(100, 35);
+        winLabel.setText("You win :)");
+        winLabel.setBackground(Color.BLACK);
+        winLabel.setOpaque(true);
+        winLabel.setFont(popUpsFont);
+        winLabel.setForeground(Color.WHITE);
+        winLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        
+        loseLabel = new JLabel();
+        loseLabel.setLocation(300, 35);
+        loseLabel.setSize(100, 35);
+        loseLabel.setText("You lose :(");
+        loseLabel.setBackground(Color.BLACK);
+        loseLabel.setOpaque(true);
+        loseLabel.setFont(popUpsFont);
+        loseLabel.setForeground(Color.WHITE);
+        loseLabel.setHorizontalAlignment(SwingConstants.CENTER);
         
         // Setup text fields and labels
         
@@ -134,7 +176,6 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
         int boxSize = 50;
         
         int marginBetween = 6;
-        int marginVertical = 40;
         int marginHorizontal = (frameWidth - (5 * (boxSize + marginBetween)))/2;
         // Set up all text boxes
         for (int row = 0; row < 6; row++) {
@@ -152,78 +193,105 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
             }
         }
         
-        String keyboardKeys = "QWERTYUIOPASDFGHJKL@ZXCVBNM&";
-        Border keyboardBorder = BorderFactory.createLineBorder(lightGray, 1);
+        Border keyboardBorder = BorderFactory.createLineBorder(lightGray, 0);
         Font keyboardFont = new Font(Font.SANS_SERIF, Font.BOLD, 20);
         
         //firstRowOfLetters
         for (int letter = 0; letter < 10; letter++) {
             int letterBoxSize = 50;
             int letterMargin = (frameWidth - (letterBoxSize + marginBetween) * 10)/2;
-            keyboardButtons.add(new JButton(keyboardKeys.substring(letter, letter + 1)));
-            JButton keyboardButton = keyboardButtons.get(letter);
-            keyboardButton.setLocation(letterMargin + letter * (letterBoxSize + marginBetween), marginVertical + (boxSize + marginBetween) * 6 + 20);
-            keyboardButton.setSize(letterBoxSize, letterBoxSize);
-            keyboardButton.setBackground(lightGray);
-            keyboardButton.setBorder(keyboardBorder);
-            keyboardButton.setFont(keyboardFont);
-            keyboardButton.addActionListener(this);
-            mainPanel.add(keyboardButton);
+            letterButtons.add(new JButton(letters.substring(letter, letter + 1)));
+            JButton letterButton = letterButtons.get(letter);
+            letterButton.setLocation(letterMargin + letter * (letterBoxSize + marginBetween), marginVertical + (boxSize + marginBetween) * 6 + 20);
+            letterButton.setSize(letterBoxSize, letterBoxSize);
+            letterButton.setBackground(lightGray);
+            letterButton.setOpaque(true);
+            letterButton.setBorder(keyboardBorder);
+            letterButton.setFont(keyboardFont);
+            letterButton.addActionListener(this);
+            mainPanel.add(letterButton);
         }
         
         //secondRowOfLetters
         for (int letter = 0; letter < 9; letter++) {
             int letterBoxSize = 50;
             int letterMargin = (frameWidth - (letterBoxSize + marginBetween) * 9)/2;
-            keyboardButtons.add(new JButton(keyboardKeys.substring(10 + letter, 10 + letter + 1)));
-            JButton keyboardButton = keyboardButtons.get(10 + letter);
-            keyboardButton.setLocation(letterMargin + letter * (letterBoxSize + marginBetween), marginVertical + (boxSize + marginBetween) * 6 + 20 + (letterBoxSize + marginBetween));
-            keyboardButton.setSize(letterBoxSize, letterBoxSize);
-            keyboardButton.setBackground(lightGray);
-            keyboardButton.setBorder(keyboardBorder);
-            keyboardButton.setFont(keyboardFont);
-            keyboardButton.addActionListener(this);
-            mainPanel.add(keyboardButton);
+            letterButtons.add(new JButton(letters.substring(10 + letter, 10 + letter + 1)));
+            JButton letterButton = letterButtons.get(10 + letter);
+            letterButton.setLocation(letterMargin + letter * (letterBoxSize + marginBetween), marginVertical + (boxSize + marginBetween) * 6 + 20 + (letterBoxSize + marginBetween));
+            letterButton.setSize(letterBoxSize, letterBoxSize);
+            letterButton.setBackground(lightGray);
+            letterButton.setOpaque(true);
+            letterButton.setBorder(keyboardBorder);
+            letterButton.setFont(keyboardFont);
+            letterButton.addActionListener(this);
+            mainPanel.add(letterButton);
         }
         
         //thirdRowOfLetters
-        for (int letter = 0; letter < 9; letter++) {
+        for (int letter = 0; letter < 7; letter++) {
             int letterBoxSize = 50;
             int letterMargin = (frameWidth - (letterBoxSize + marginBetween) * 9)/2;
-            keyboardButtons.add(new JButton(keyboardKeys.substring(19 + letter, 19 + letter + 1)));
-            JButton keyboardButton = keyboardButtons.get(19 + letter);
-            keyboardButton.setLocation(letterMargin + letter * (letterBoxSize + marginBetween), marginVertical + (boxSize + marginBetween) * 6 + 20 + (letterBoxSize + marginBetween) * 2);
-            keyboardButton.setSize(letterBoxSize, letterBoxSize);
-            keyboardButton.setBackground(lightGray);
-            keyboardButton.setBorder(keyboardBorder);
-            keyboardButton.setFont(keyboardFont);
-            keyboardButton.addActionListener(this);
-            mainPanel.add(keyboardButton);
+            letterButtons.add(new JButton(letters.substring(19 + letter, 19 + letter + 1)));
+            JButton letterButton = letterButtons.get(19 + letter);
+            letterButton.setLocation(letterMargin + letterBoxSize + marginBetween + letter * (letterBoxSize + marginBetween), marginVertical + (boxSize + marginBetween) * 6 + 20 + (letterBoxSize + marginBetween) * 2);
+            letterButton.setSize(letterBoxSize, letterBoxSize);
+            letterButton.setBackground(lightGray);
+            letterButton.setOpaque(true);
+            letterButton.setBorder(keyboardBorder);
+            letterButton.setFont(keyboardFont);
+            letterButton.addActionListener(this);
+            mainPanel.add(letterButton);
         }
+        
+        int commandsKeyWidth = 80; 
+        Font commandsFont = new Font(Font.SANS_SERIF, Font.BOLD, 10);
+
+        letterButtons.add(new JButton("ENTER"));
+        JButton enterButton = letterButtons.get(26);
+        enterButton.setLocation(68, marginVertical + (boxSize + marginBetween) * 6 + 20 + (50 + marginBetween) * 2);
+        enterButton.setSize(80, 50);
+        enterButton.setBackground(lightGray);
+        enterButton.setOpaque(true);
+        enterButton.setBorder(keyboardBorder);
+        enterButton.setFont(commandsFont);
+        enterButton.addActionListener(this);
+        mainPanel.add(enterButton);
+        
+        letterButtons.add(new JButton("DELETE"));
+        JButton deleteButton = letterButtons.get(27);
+        deleteButton.setLocation(546, marginVertical + (boxSize + marginBetween) * 6 + 20 + (50 + marginBetween) * 2);
+        deleteButton.setSize(80, 50);
+        deleteButton.setBackground(lightGray);
+        deleteButton.setOpaque(true);
+        deleteButton.setBorder(keyboardBorder);
+        deleteButton.setFont(commandsFont);
+        deleteButton.addActionListener(this);
+        mainPanel.add(deleteButton);
         
         frame.setVisible(true);
         
         mainPanel.addKeyListener(this);
         mainPanel.setFocusable(true);
         mainPanel.requestFocusInWindow();
+        
     }
     
     public void actionPerformed(ActionEvent event) {
-        //for displayed buttons
-        Border typedBorder = BorderFactory.createLineBorder(darkGray, 2);
-        Border untypedBorder = BorderFactory.createLineBorder(lightGray, 2);
-        
         JButton buttonPressed = (JButton) event.getSource();
-        if (buttonPressed.getText().equals("&")) {
+        if (buttonPressed.getText().equals("DELETE")) {
             if (currentColumn != 0) {
                 currentWord = currentWord.substring(0, currentColumn - 1);
                 currentColumn--;
                 JLabel letterLabel = letterLabels.get(currentRow * 5 + currentColumn);
                 letterLabel.setText("");
                 letterLabel.setBorder(untypedBorder);
-                keys.remove(keys.size() - 1); //idk why I wrote this
+                
+                mainPanel.remove(invalidGuessLabel);
+                mainPanel.revalidate();
+                mainPanel.repaint();
             }
-        } else if (buttonPressed.getText().equals("@")) {
+        } else if (buttonPressed.getText().equals("ENTER")) {
             if (currentColumn == 5) {
                 System.out.println(currentWord);
                 if (guessWords.contains(currentWord)) {
@@ -233,13 +301,16 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
                     currentColumn = 0;
                     
                     currentWord = "";
-                    
+                } else {
+                    mainPanel.add(invalidGuessLabel);
+                    mainPanel.revalidate();
+                    mainPanel.repaint();
                 }
             }
         } else {
             if (currentColumn < 5) {
                 JLabel letterLabel = letterLabels.get(currentRow * 5 + currentColumn);
-                letterLabel.setText(String.valueOf(buttonPressed.getText()));
+                letterLabel.setText(buttonPressed.getText());
                 letterLabel.setBorder(typedBorder);
                 currentColumn++;
                 
@@ -250,31 +321,43 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
     
     @Override
     public void keyPressed(KeyEvent e) {
-        JLabel label = new JLabel();
-        label.setSize(50, 50);
-        label.setSize(50, 200);
-        label.setText(String.valueOf(e.getKeyChar()));
-        mainPanel.add(label);
-        System.out.println("poop");
-        
-        if (e.getKeyChar() == KeyEvent.CHAR_UNDEFINED) {
-            if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
-                if (currentColumn != 0) {
-                    currentColumn--;
-                    keys.remove(keys.size() - 1);
-                }
-            } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                if (currentColumn == 4) {
+        if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+            if (currentColumn != 0) {
+                currentWord = currentWord.substring(0, currentColumn - 1);
+                currentColumn--;
+                JLabel letterLabel = letterLabels.get(currentRow * 5 + currentColumn);
+                letterLabel.setText("");
+                letterLabel.setBorder(untypedBorder);
+                    
+                mainPanel.remove(invalidGuessLabel);
+                mainPanel.revalidate();
+                mainPanel.repaint();
+            }
+        } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+            if (currentColumn == 5) {
+                System.out.println(currentWord);
+                if (guessWords.contains(currentWord)) {
                     colorTime();
                     
-                    currentColumn = 0;
                     currentRow += 1;
+                    currentColumn = 0;
+                        
+                    currentWord = "";
+                } else {
+                    mainPanel.add(invalidGuessLabel);
+                    mainPanel.revalidate();
+                    mainPanel.repaint();
                 }
             }
         } else {
-            JLabel letterLabel = letterLabels.get(currentRow * 5 + currentColumn);
-            letterLabel.setText(String.valueOf(e.getKeyChar()));
-            currentColumn++;
+            if (currentColumn < 5 && Character.isLetter(e.getKeyCode())) {
+                JLabel letterLabel = letterLabels.get(currentRow * 5 + currentColumn);
+                letterLabel.setText(String.valueOf(e.getKeyChar()).toUpperCase());
+                letterLabel.setBorder(typedBorder);
+                currentColumn++;
+                
+                currentWord += String.valueOf(e.getKeyChar()).toUpperCase();
+            }
         }
     }
     
@@ -332,28 +415,21 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
             letterLabel.setForeground(Color.WHITE);
             letterLabel.setBorder(processedBorder);
             
+            JButton letterButton = letterButtons.get(letters.indexOf(currLetter));
+            letterButton.setBackground(color);
+            letterButton.setForeground(Color.WHITE);
         }
         
-        // int currIndex = 0;
-        // while (lettersRemaining.size() > 0) {
-            // String currLetter = lettersRemaining.get(currIndex);
-            
-            // int targetIndex = targetWordList.indexOf(currLetter);
-            // int guessIndex = guessWordList.indexOf(currLetter);
-            
-            // Color color = Color.DARK_GRAY;
-            
-            // if (targetIndex != -1) {
-                // if (targetIndex == guessIndex) {
-                    // color = Color.GREEN;
-                // } else {
-                    // color = Color.YELLOW;
-                // }
-            // }
-            // //fill out more cases
-            
-            // letterLabels.get(currentRow * 5 + currIndex).setBackground(color);
-        // }
+        if (targetWordList.equals(guessWordList)) {
+            mainPanel.add(winLabel);
+            mainPanel.repaint();
+        }
+        
+        if (currentRow == 5) {
+            mainPanel.add(loseLabel);
+            mainPanel.repaint();
+        }
+        
     }
     
     public static void start() {
