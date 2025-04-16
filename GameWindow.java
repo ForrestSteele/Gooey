@@ -28,7 +28,7 @@ import javax.swing.Timer;
 /**
  * Provides methods to construct and manipulate the main game window. 
  *
- * @author Forrest Steele, 
+ * @author Forrest Steele
  * @version March 2025
  */
 public class GameWindow implements ActionListener, Runnable, KeyListener
@@ -90,7 +90,7 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
         letters = "QWERTYUIOPASDFGHJKLZXCVBNM";
         
         //fonts
-        popUpsFont = new Font(Font.SANS_SERIF, Font.BOLD, 10);
+        popUpsFont = new Font(Font.SANS_SERIF, Font.BOLD, 12);
         commandsFont = new Font(Font.SANS_SERIF, Font.BOLD, 10);
         guessFont = new Font(Font.SANS_SERIF, Font.BOLD, 25);
         letterButtonsFont = new Font(Font.SANS_SERIF, Font.BOLD, 20);
@@ -163,8 +163,8 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
         
         //pop ups for invalid guess word, win, and loss
         invalidGuessLabel = new JLabel();
-        invalidGuessLabel.setLocation(300, 35);
-        invalidGuessLabel.setSize(100, 35);
+        invalidGuessLabel.setLocation(295, 35);
+        invalidGuessLabel.setSize(110, 35);
         invalidGuessLabel.setText("Not in word list");
         invalidGuessLabel.setBackground(Color.BLACK);
         invalidGuessLabel.setOpaque(true);
@@ -181,11 +181,11 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
         winStatements.add("Great");
         
         int randomIndex = (int) (Math.random() * winStatements.size()) + 0;
-        
+        String winStatement = winStatements.get(randomIndex);
         winLabel = new JLabel();
         winLabel.setLocation(300, 35);
-        winLabel.setSize(100, 35);
-        winLabel.setText(winStatements.get(randomIndex));
+        winLabel.setSize(winStatement.length() * 10 + 15, 35);
+        winLabel.setText(winStatement);
         winLabel.setBackground(Color.BLACK);
         winLabel.setOpaque(true);
         winLabel.setFont(popUpsFont);
