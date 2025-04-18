@@ -30,14 +30,27 @@ public class SudokuSolver
     }
     
     public void printBoard() {
-        System.out.println(board.toString());
+        for (int row = 0; row < 10; row++) {
+            String line = "";
+            for (int col = 0; col < 10; col++) {
+                if (col == 2 || col == 5) {
+                    line += " " + board[row][col] + " | ";
+                }
+                line += " " + board[row][col] + " ";
+            }
+            System.out.println(line);
+            if (row == 2 || row == 5) {
+                System.out.println("------------------------------------------");
+            }
+        }
+        
     }
     
     public void createGraph() {
         for (int row = 0; row < 10; row++) {
             for (int col = 0; col < 10; col++) {
                 String position = row + ", " + col;
-                boardGraph.addVertex(position, String.valueOf(0));
+                boardGraph.addVertex(position, String.valueOf(board[row][col]));
             }
         }
     }
@@ -53,5 +66,9 @@ public class SudokuSolver
             }
         }
         return response;
+    }
+    
+    private void solver() {
+        
     }
 }

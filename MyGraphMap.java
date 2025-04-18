@@ -71,14 +71,12 @@ public class MyGraphMap
     }
     
     public boolean noAdjDups(String startLabel) {
-        boolean response = false;
         for (Vertex vertex : vertices.get(startLabel).getAdjacent()) {
             if (vertex.getValue().equals(startLabel)) {
-                response = true;
-                break;
+                return false;
             }
         }
-        return response;
+        return true;
     }
     
     /**
