@@ -38,6 +38,8 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
     
     private ArrayList<String> guessWords;
     
+    private ArrayList<JButton> correctStorage;
+    
     private String targetWord;
     private String guessWord;
     private String currentWord;
@@ -75,6 +77,8 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
         //setting up lists of letter labels and buttons
         letterLabels = new ArrayList<JLabel>();
         letterButtons = new ArrayList<JButton>();
+        
+        correctStorage = new ArrayList<JButton>();
         
         //initilizing current row and columnn to zero
         currentRow = 0;
@@ -154,8 +158,8 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
         
         //adding description text
         JLabel specialText = new JLabel();
-        specialText.setText("© 2025 The New York Times Company | NYTimes.com | Sitemap | Privacy Policy | Terms of Service | Terms of Sale | California Notices");
-        specialText.setLocation(92, 530 + marginVertical + 135);
+        specialText.setText("© 2025 The Mainsheet Newspaper | ChadwickSchool.org | Sitemap | Privacy Policy | Terms of Service | Terms of Sale | California Notices");
+        specialText.setLocation(110, 530 + marginVertical + 135);
         specialText.setSize(515, 40);
         Font specialFont = new Font(Font.DIALOG, Font.PLAIN, 8);
         specialText.setFont(specialFont);
@@ -182,9 +186,10 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
         
         int randomIndex = (int) (Math.random() * winStatements.size()) + 0;
         String winStatement = winStatements.get(randomIndex);
+        int labelWidth = winStatement.length() * 10 + 15;
         winLabel = new JLabel();
-        winLabel.setLocation(300, 35);
-        winLabel.setSize(winStatement.length() * 10 + 15, 35);
+        winLabel.setLocation((700 - labelWidth)/2, 35);
+        winLabel.setSize(labelWidth, 35);
         winLabel.setText(winStatement);
         winLabel.setBackground(Color.BLACK);
         winLabel.setOpaque(true);
@@ -193,7 +198,7 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
         winLabel.setHorizontalAlignment(SwingConstants.CENTER);
         
         loseLabel = new JLabel();
-        loseLabel.setLocation(300, 35);
+        loseLabel.setLocation((700 - 70)/2, 35);
         loseLabel.setSize(70, 35);
         loseLabel.setText(targetWord);
         loseLabel.setBackground(Color.BLACK);
@@ -351,6 +356,7 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
                 currentWord += buttonPressed.getText();
             }
         }
+        mainPanel.requestFocusInWindow();
     }
     
     @Override
@@ -440,8 +446,13 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
             letterLabel.setBorder(processedBorder);
             
             JButton letterButton = letterButtons.get(letters.indexOf(currLetter));
-            letterButton.setBackground(color);
-            letterButton.setForeground(Color.WHITE);
+            if (!correctStorage.contains(letterButton)) { //only change background if 
+                //button is not already set to green - want to tell user that they
+                //know where this letter is placed if they have made correct guess prior
+                letterButton.setBackground(color);
+                letterButton.setForeground(Color.WHITE);
+                correctStorage.add(letterButton);
+            }
         }
         
         //run again to check for letters that do exist in letters remanining, note - won't replace 
@@ -464,8 +475,11 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
                 letterLabel.setBorder(processedBorder);
                 
                 JButton letterButton = letterButtons.get(letters.indexOf(currLetter));
-                letterButton.setBackground(yellow);
-                letterButton.setForeground(Color.WHITE);
+
+                if (!correctStorage.contains(letterButton)) {
+                    letterButton.setBackground(yellow);
+                    letterButton.setForeground(Color.WHITE);
+                }
             }
         }
         
