@@ -120,9 +120,7 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
         
         int randomIndex = (int) (Math.random() * targetWords.size()) + 0;
         targetWord = targetWords.get(randomIndex);
-        
-        System.out.println(targetWord);
-                
+                        
         //creating list of all possible guess words
         guessWords = new ArrayList<>();
         try {
@@ -158,7 +156,7 @@ public class GameWindow implements ActionListener, Runnable, KeyListener
         
         //adding description text
         JLabel specialText = new JLabel();
-        specialText.setText("© 2025 The Mainsheet Newspaper | ChadwickSchool.org | Sitemap | Privacy Policy | Terms of Service | Terms of Sale | California Notices");
+        specialText.setText("© 2025 The Mainsheet Newspaper | chadwickschool.org | Sitemap | Privacy Policy | Terms of Service | Terms of Sale | California Notices");
         specialText.setLocation(110, 530 + marginVertical + 135);
         specialText.setSize(515, 40);
         Font specialFont = new Font(Font.DIALOG, Font.PLAIN, 8);

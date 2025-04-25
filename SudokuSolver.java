@@ -51,6 +51,17 @@ public class SudokuSolver
             for (int col = 0; col < 10; col++) {
                 String position = row + ", " + col;
                 boardGraph.addVertex(position, String.valueOf(board[row][col]));
+                for (int i = 0; i < col; i++) {
+                    boardGraph.addEdge(i + ", " + col, position);
+                }
+            }
+        }
+        for (int col = 0; col < 10; col++) {
+            for (int row = 0; row < 10; row++) {
+                String position = row + ", " + col;
+                for (int j = 0; j < row; j++) {
+                    boardGraph.addEdge(row + ", " + j, position);
+                }
             }
         }
     }
@@ -68,7 +79,41 @@ public class SudokuSolver
         return response;
     }
     
-    private void solver() {
+    private boolean solver(int row, int col) {
+        int nextRow;
+        int nextCol;
         
+        if (col == 8) {
+            nextCol = 0;
+            nextRow = row + 1;
+        } else {
+            nextCol = col + 1;
+            nextRow = row;
+        }
+        
+        if (row == 9) { //this means the previous call worked, and the next row
+            //was passed in as 9
+            return true;
+        }
+        
+        if (board[row][col] != 0) {
+            solver(nextRow, nextCol);
+        } else {
+            for (int num = 1; num < 10; num++) {
+                board[row][col] = num;
+                boardGraph.setVertex(row + ", " + col, String.valueOf(num));
+                if (boardGraph.noAdjDups(row + ", " + col)) {
+                    if (solver(nextRow, nextCol)) {
+                        return true; //passes true, if the next one is true
+                    }
+                }
+            }
+            board[row][col] = 0; //if it loops through without finishing the 
+            //entire board, then that means that this current one is incorrect, 
+            //therefore, this one must be reset to 0, and also return false, 
+            //so the previous one will not finish its loop
+            boardGraph.setVertex(row + ", " + col, String.valueOf(0));
+            return false;
+        }
     }
 }
