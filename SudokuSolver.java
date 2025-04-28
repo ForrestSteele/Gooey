@@ -14,7 +14,6 @@ public class SudokuSolver
     private MyGraphMap boardGraph;
 
     public SudokuSolver() {
-        board = new int[9][9];
         // completeBoard = {
             // {5, 3, 4, 6, 7, 8, 9, 1, 2},  
             // {6, 7, 2, 1, 9, 5, 3, 4, 8},  
@@ -26,41 +25,51 @@ public class SudokuSolver
             // {2, 8, 7, 4, 1, 9, 6, 3, 5},  
             // {3, 4, 5, 2, 8, 6, 1, 7, 9}
         // };
+        board = new int[][] {{5, 3, 0, 0, 7, 0, 0, 0, 0},  
+            {6, 0, 0, 1, 9, 5, 0, 0, 0},  
+            {0, 9, 8, 0, 0, 0, 0, 6, 0},  
+            {8, 0, 0, 0, 6, 0, 0, 0, 3},  
+            {4, 0, 0, 8, 0, 3, 0, 0, 1},  
+            {7, 0, 0, 0, 2, 0, 0, 0, 6},  
+            {0, 6, 0, 0, 0, 0, 2, 8, 0},  
+            {0, 0, 0, 4, 1, 9, 0, 0, 5},  
+            {0, 0, 0, 0, 8, 0, 0, 7, 9}};
+
         boardGraph = new MyGraphMap();
     }
     
     public void printBoard() {
-        for (int row = 0; row < 10; row++) {
+        for (int row = 0; row < 9; row++) {
             String line = "";
-            for (int col = 0; col < 10; col++) {
+            for (int col = 0; col < 9; col++) {
                 if (col == 2 || col == 5) {
-                    line += " " + board[row][col] + " | ";
+                    line += " " + board[row][col] + "  | ";
+                } else {
+                    line += " " + board[row][col] + " ";
                 }
-                line += " " + board[row][col] + " ";
             }
             System.out.println(line);
             if (row == 2 || row == 5) {
                 System.out.println("------------------------------------------");
             }
         }
-        
     }
     
     public void createGraph() {
-        for (int row = 0; row < 10; row++) {
-            for (int col = 0; col < 10; col++) {
+        for (int row = 0; row < 9; row++) {
+            for (int col = 0; col < 9; col++) {
                 String position = row + ", " + col;
                 boardGraph.addVertex(position, String.valueOf(board[row][col]));
                 for (int i = 0; i < col; i++) {
-                    boardGraph.addEdge(i + ", " + col, position);
+                    boardGraph.addEdge(row + ", " + i, position);
                 }
             }
         }
-        for (int col = 0; col < 10; col++) {
-            for (int row = 0; row < 10; row++) {
+        for (int col = 0; col < 9; col++) {
+            for (int row = 0; row < 9; row++) {
                 String position = row + ", " + col;
                 for (int j = 0; j < row; j++) {
-                    boardGraph.addEdge(row + ", " + j, position);
+                    boardGraph.addEdge(j + ", " + col, position);
                 }
             }
         }
@@ -68,8 +77,8 @@ public class SudokuSolver
     
     public boolean validateBoard() {
         boolean response = false;
-        for (int row = 0; row < 10; row++) {
-            for (int col = 0; col < 10; col++) {
+        for (int row = 0; row < 9; row++) {
+            for (int col = 0; col < 9; col++) {
                 String position = row + ", " + col;
                 if (boardGraph.noAdjDups(position) == true) {
                     response = true;
@@ -77,6 +86,10 @@ public class SudokuSolver
             }
         }
         return response;
+    }
+    
+    public void solve() {
+        solver(0,0);
     }
     
     private boolean solver(int row, int col) {
@@ -115,5 +128,16 @@ public class SudokuSolver
             boardGraph.setVertex(row + ", " + col, String.valueOf(0));
             return false;
         }
+        return true;
+    }
+    
+    public void start() {
+        printBoard();
+        createGraph();
+        solve();
+        System.out.println();
+        printBoard();
+        System.out.println();
+        System.out.println();
     }
 }
