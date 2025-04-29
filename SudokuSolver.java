@@ -14,7 +14,7 @@ public class SudokuSolver
     private MyGraphMap boardGraph;
 
     public SudokuSolver() {
-        // completeBoard = {
+        // board = new int[][] {
             // {5, 3, 4, 6, 7, 8, 9, 1, 2},  
             // {6, 7, 2, 1, 9, 5, 3, 4, 8},  
             // {1, 9, 8, 3, 4, 2, 5, 6, 7},  
@@ -59,33 +59,47 @@ public class SudokuSolver
         for (int row = 0; row < 9; row++) {
             for (int col = 0; col < 9; col++) {
                 String position = row + ", " + col;
-                boardGraph.addVertex(position, String.valueOf(board[row][col]));
-                for (int i = 0; i < col; i++) {
-                    boardGraph.addEdge(row + ", " + i, position);
-                }
+                boardGraph.addVertex(position, "" + board[row][col]);
             }
         }
-        for (int col = 0; col < 9; col++) {
-            for (int row = 0; row < 9; row++) {
+        
+        for (int row = 0; row < 9; row++) {
+            for (int col = 0; col < 9; col++) {
                 String position = row + ", " + col;
-                for (int j = 0; j < row; j++) {
-                    boardGraph.addEdge(j + ", " + col, position);
+                //add edges for adjacent row
+                for (int c = 0; c < 9; c++) {
+                    if (c != col) {
+                        boardGraph.addEdge(position, row + ", " + c);
+                    }
+                }
+                //add edges for adjacent columns
+                for (int r = 0; r < 9; r++) {
+                    if (r != row) {
+                        boardGraph.addEdge(position, r + ", " + col);
+                    }
+                }
+                //add edges for sqaure neighbors
+                for (int r = 3*(row/3); r <= 3*(row/3) + 2; r++) {
+                    for (int c = 3*(col/3); c <= 3*(col/3) + 2; c++) {
+                        if (r != row && c != col) {
+                            boardGraph.addEdge(position, r + ", " + c);
+                        }
+                    }
                 }
             }
         }
     }
     
     public boolean validateBoard() {
-        boolean response = false;
         for (int row = 0; row < 9; row++) {
             for (int col = 0; col < 9; col++) {
                 String position = row + ", " + col;
-                if (boardGraph.noAdjDups(position) == true) {
-                    response = true;
+                if (boardGraph.noAdjDups(position) == false) {
+                    return false;
                 }
             }
         }
-        return response;
+        return true;
     }
     
     public void solve() {
@@ -110,11 +124,14 @@ public class SudokuSolver
         }
         
         if (board[row][col] != 0) {
-            solver(nextRow, nextCol);
+            return solver(nextRow, nextCol);
         } else {
             for (int num = 1; num < 10; num++) {
                 board[row][col] = num;
                 boardGraph.setVertex(row + ", " + col, String.valueOf(num));
+                System.out.println();
+                System.out.print("next");
+                printBoard();
                 if (boardGraph.noAdjDups(row + ", " + col)) {
                     if (solver(nextRow, nextCol)) {
                         return true; //passes true, if the next one is true
@@ -128,7 +145,6 @@ public class SudokuSolver
             boardGraph.setVertex(row + ", " + col, String.valueOf(0));
             return false;
         }
-        return true;
     }
     
     public void start() {

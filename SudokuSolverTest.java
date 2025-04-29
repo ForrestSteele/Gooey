@@ -11,4 +11,10 @@ public class SudokuSolverTest
         SudokuSolver sudoku = new SudokuSolver();
         sudoku.start();
     }
+    
+    public static void testValidation() {
+        SudokuSolver sudoku = new SudokuSolver();
+        sudoku.createGraph();
+        System.out.println(sudoku.validateBoard());
+    }
 }
